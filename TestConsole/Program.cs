@@ -79,7 +79,9 @@ namespace TestConsole
                 string txtName = fullName.Replace(".pdf", ".txt");
                 File.WriteAllText(txtName, result);
                 Console.WriteLine("Uploading: " + fileName);
-                SqlCommand insertPDF = new SqlCommand("insert into FTSTest(Filename, FTSContent) OUTPUT INSERTED.ID values(@Filename, @FTSContent)", conn);
+                long id = getIDFromFilenameOrIncrementalFromDB(fileName, conn);
+                SqlCommand insertPDF = new SqlCommand("insert into FTSTest(ID, Filename, FTSContent) OUTPUT INSERTED.ID values(@ID, @Filename, @FTSContent)", conn);
+                insertPDF.Parameters.Add("@ID", id);
                 insertPDF.Parameters.Add("@Filename", fileName);
                 insertPDF.Parameters.Add("@FTSContent", result);
                 //insertPDF.ExecuteNonQuery();
@@ -95,6 +97,23 @@ namespace TestConsole
             }
             conn.Close();
 
+        }
+
+        private static long getIDFromFilenameOrIncrementalFromDB(string fileName, SqlConnection conn)
+        {
+            string candidateIDStr = Path.GetFileNameWithoutExtension(fileName);
+            try
+            {
+                return Convert.ToInt64(candidateIDStr);
+            }
+            catch (FormatException)
+            {
+                SqlCommand command = new SqlCommand("select max(id) + 1 from FTSTest", conn);
+                long id = (long) command.ExecuteScalar();
+                if (id < 1000000000)
+                    id = 1000000000;
+                return id;
+            }
         }
 
         private static DBFieldTextData[] GetSections(List<Match> matchList, Regex regex, string fullContent)
