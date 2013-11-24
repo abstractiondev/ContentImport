@@ -47,6 +47,7 @@ namespace TestConsole
         static void Main(string[] args)
         {
 
+            Console.WriteLine(@"Trying to read contents from c:\tmp\PDFsToImport\...");
             string connStr = File.ReadAllText(@"c:\tmp\PDFsToImport\testconnstr.txt");
             string regexStr = File.ReadAllText(@"c:\tmp\PDFsToImport\sectionsplit_regexps.txt");
             Regex regex = new Regex(regexStr, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline);
